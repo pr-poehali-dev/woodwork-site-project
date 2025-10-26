@@ -1,19 +1,82 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 
+interface ContactRequest {
+  id: number;
+  phone: string;
+  created_at: string;
+  status: string;
+  notes: string | null;
+}
+
 export default function Admin() {
   const { toast } = useToast();
   const [phoneMain, setPhoneMain] = useState('+7 (495) 123-45-67');
   const [phoneSecondary, setPhoneSecondary] = useState('+7 (926) 987-65-43');
+  const [contactRequests, setContactRequests] = useState<ContactRequest[]>([]);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+  const [contactFilter, setContactFilter] = useState<string>('');
+
+  useEffect(() => {
+    fetchContactRequests();
+  }, [contactFilter]);
+
+  const fetchContactRequests = async () => {
+    setLoadingContacts(true);
+    try {
+      const url = contactFilter 
+        ? `https://functions.poehali.dev/ff332474-3781-42e4-92c4-ff59c6e63d43?status=${contactFilter}`
+        : 'https://functions.poehali.dev/ff332474-3781-42e4-92c4-ff59c6e63d43';
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (data.requests) {
+        setContactRequests(data.requests);
+      }
+    } catch (error) {
+      console.error('Failed to fetch requests:', error);
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось загрузить заявки',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoadingContacts(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, { label: string; className: string }> = {
+      'new': { label: 'Новая', className: 'bg-primary text-primary-foreground' },
+      'processing': { label: 'В работе', className: 'bg-yellow-500 text-white' },
+      'completed': { label: 'Обработана', className: 'bg-green-500 text-white' }
+    };
+    
+    const config = variants[status] || { label: status, className: 'bg-gray-500 text-white' };
+    return <Badge className={config.className}>{config.label}</Badge>;
+  };
 
   const handleSaveSettings = () => {
     toast({
@@ -33,8 +96,9 @@ export default function Admin() {
             <p className="text-muted-foreground">Управление контентом сайта</p>
           </div>
 
-          <Tabs defaultValue="settings" className="space-y-6">
-            <TabsList className="grid grid-cols-2 md:grid-cols-7 w-full">
+          <Tabs defaultValue="contacts" className="space-y-6">
+            <TabsList className="grid grid-cols-2 md:grid-cols-8 w-full">
+              <TabsTrigger value="contacts">Заявки</TabsTrigger>
               <TabsTrigger value="settings">Настройки</TabsTrigger>
               <TabsTrigger value="services">Услуги</TabsTrigger>
               <TabsTrigger value="gallery">Галерея</TabsTrigger>
@@ -43,6 +107,109 @@ export default function Admin() {
               <TabsTrigger value="partners">Партнеры</TabsTrigger>
               <TabsTrigger value="certificates">Сертификаты</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="contacts">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Заявки с сайта</CardTitle>
+                  <CardDescription>Управление обращениями клиентов</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-6 flex gap-3 flex-wrap">
+                    <Button 
+                      variant={contactFilter === '' ? 'default' : 'outline'}
+                      onClick={() => setContactFilter('')}
+                    >
+                      Все заявки
+                    </Button>
+                    <Button 
+                      variant={contactFilter === 'new' ? 'default' : 'outline'}
+                      onClick={() => setContactFilter('new')}
+                    >
+                      <Icon name="Bell" size={16} className="mr-2" />
+                      Новые
+                    </Button>
+                    <Button 
+                      variant={contactFilter === 'processing' ? 'default' : 'outline'}
+                      onClick={() => setContactFilter('processing')}
+                    >
+                      <Icon name="Clock" size={16} className="mr-2" />
+                      В работе
+                    </Button>
+                    <Button 
+                      variant={contactFilter === 'completed' ? 'default' : 'outline'}
+                      onClick={() => setContactFilter('completed')}
+                    >
+                      <Icon name="CheckCircle2" size={16} className="mr-2" />
+                      Обработаны
+                    </Button>
+                  </div>
+
+                  {loadingContacts ? (
+                    <div className="text-center py-12">
+                      <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+                      <p className="mt-4 text-muted-foreground">Загрузка...</p>
+                    </div>
+                  ) : contactRequests.length === 0 ? (
+                    <div className="py-12 text-center">
+                      <Icon name="Inbox" size={48} className="mx-auto text-muted-foreground mb-4" />
+                      <p className="text-xl text-muted-foreground">Заявок пока нет</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {contactRequests.map((request) => (
+                        <Card key={request.id} className="border-2">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <CardTitle>Заявка #{request.id}</CardTitle>
+                                  {getStatusBadge(request.status)}
+                                </div>
+                                <CardDescription>
+                                  <div className="flex items-center gap-2">
+                                    <Icon name="Calendar" size={14} />
+                                    {formatDate(request.created_at)}
+                                  </div>
+                                </CardDescription>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center gap-3">
+                              <Icon name="Phone" size={20} className="text-primary" />
+                              <a 
+                                href={`tel:${request.phone}`}
+                                className="text-lg font-semibold hover:text-primary transition-colors"
+                              >
+                                {request.phone}
+                              </a>
+                            </div>
+                            {request.notes && (
+                              <div className="mt-4 p-3 bg-accent/50 rounded-lg text-sm">
+                                {request.notes}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-6 text-center">
+                    <div className="inline-flex items-center gap-3 p-4 bg-accent/50 rounded-lg">
+                      <Icon name="BarChart3" size={24} className="text-primary" />
+                      <div>
+                        <div className="text-2xl font-bold">{contactRequests.length}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {contactFilter ? 'Заявок в категории' : 'Всего заявок'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             <TabsContent value="settings">
               <Card>

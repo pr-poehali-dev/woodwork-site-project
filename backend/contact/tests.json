@@ -1,0 +1,33 @@
+{
+  "tests": [
+    {
+      "name": "Save contact request with valid phone",
+      "method": "POST",
+      "body": {
+        "phone": "+7 (999) 123-45-67"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "message": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Reject empty phone",
+      "method": "POST",
+      "body": {
+        "phone": ""
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "Phone is required"
+      }
+    },
+    {
+      "name": "Handle OPTIONS for CORS",
+      "method": "OPTIONS",
+      "expectedStatus": 200
+    }
+  ]
+}
