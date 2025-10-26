@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,35 +6,35 @@
 
 @layer base {
   :root {
-    --background: 40 25% 95%;
-    --foreground: 15 25% 20%;
+    --background: 30 15% 96%;
+    --foreground: 25 30% 12%;
 
-    --card: 42 30% 98%;
-    --card-foreground: 15 25% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 30% 12%;
 
-    --popover: 42 30% 98%;
-    --popover-foreground: 15 25% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 30% 12%;
 
-    --primary: 140 45% 30%;
-    --primary-foreground: 40 25% 95%;
+    --primary: 30 45% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 25 35% 25%;
-    --secondary-foreground: 40 25% 95%;
+    --secondary: 25 30% 25%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 40 15% 88%;
-    --muted-foreground: 15 10% 45%;
+    --muted: 30 10% 92%;
+    --muted-foreground: 25 15% 45%;
 
-    --accent: 40 40% 80%;
-    --accent-foreground: 15 25% 20%;
+    --accent: 35 60% 85%;
+    --accent-foreground: 25 30% 12%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 40 20% 88%;
-    --input: 40 20% 88%;
-    --ring: 140 45% 30%;
+    --border: 30 12% 88%;
+    --input: 30 12% 88%;
+    --ring: 30 45% 50%;
 
-    --radius: 1rem;
+    --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -92,7 +92,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Inter", sans-serif;
+    font-family: "Outfit", sans-serif;
   }
 
   h1,
@@ -101,6 +101,6 @@
   h4,
   h5,
   h6 {
-    font-family: "Playfair Display", serif;
+    font-family: "Space Grotesk", sans-serif;
   }
 }
