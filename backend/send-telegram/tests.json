@@ -1,0 +1,30 @@
+{
+  "tests": [
+    {
+      "name": "Send contact form to Telegram",
+      "method": "POST",
+      "body": {
+        "name": "Иван Петров",
+        "phone": "+7 999 123-45-67",
+        "message": "Интересует покраска дома"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Missing required fields",
+      "method": "POST",
+      "body": {
+        "message": "Только сообщение"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
